@@ -22,7 +22,6 @@ void serialize_tree(Node* root, FILE* file, char* biggest_node) {
     unsigned int size;
     if (root->leaf) {
         if (root->pseudo) {
-            std::cout << "PSEUDO NODE" << std::endl;
             size = PSEUDO_NODE_SIZE;
             serialize_pseudo_node(root, biggest_node);
         } else {
@@ -73,16 +72,19 @@ void serialize_text(bitpair* bp, std::string filename, long fsize, FILE* ptr, st
     unsigned int full_chunks = fsize / BUFFER_SIZE;
     unsigned int leftover_bytes = fsize % BUFFER_SIZE;
     char* buffer = new char[BUFFER_SIZE];
-    fseek(ptr, 0, SEEK_SET);
+    FILE* source = fopen(filename.c_str(), "rb");
+    fseek(source, 0, SEEK_SET);
+    std::cout << ftell(ptr) << std::endl;
     for (int i = 0; i < full_chunks; i++) {
-        fread(buffer, sizeof(char), BUFFER_SIZE, ptr);
+        fread(buffer, sizeof(char), BUFFER_SIZE, source);
         write_bytes(buffer, BUFFER_SIZE, bp, &bit_count, &int_byte, &num_bytes, ptr);
     }
     if (leftover_bytes) {
-        fread(buffer, sizeof(char), leftover_bytes, ptr);
+        fread(buffer, sizeof(char), leftover_bytes, source);
         write_bytes(buffer, leftover_bytes, bp, &bit_count, &int_byte, &num_bytes, ptr);
     }
     delete[] buffer;
+    fclose(source);
     if (bit_count) {
         while (bit_count) {
             for (unsigned char bit : *pseudo_bits) {
