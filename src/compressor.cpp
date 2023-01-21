@@ -58,13 +58,11 @@ void printBT(const std::string& prefix, const Node* node, bool isLeft)
     std::cout << (isLeft ? "├──" : "└──" );
 
     // print the value of the node
-    if (node->leaf) {
-        std::cout << " - ";
+    if (node->leaf)
         if (node->pseudo)
-            std::cout << " - PSEUDO NODE";
+            std::cout << " PSEUDO NODE";
         else
             std::cout << '\'' << node->chr << "'";
-    }
     std::cout << std::endl;
     if (!node->leaf) {
         // enter the next tree level - left and right branch
@@ -161,11 +159,8 @@ long read_file(std::string filename, nodepq* pq) {
 void print_bitpairs(bitpair* bp, std::vector<unsigned char>* pseudo_bits) {
     for (const auto& elem : *bp) {
         std::cout << '\'' << elem.first << '\'' << ": ";
-        for (const auto& e : elem.second) {
+        for (const auto& e : elem.second)
             std::cout << +e;
-        }
-        if (elem.second == *pseudo_bits)
-            std::cout << " - PSEUDO NODE";
         std::cout << '\n';
     }
 }
@@ -183,7 +178,7 @@ int main() {
         gen_bitpair(root, nullptr, &bp, &temp, &pseudo_bits);
     }
     printBT(root);
-    print_bitpairs(&bp, &pseudo_bits);
+    //print_bitpairs(&bp, &pseudo_bits);
     FILE* file = fopen("out.bin", "wb");
     serialize_tree(root, file);
     serialize_text(&bp, filename, size, file, &pseudo_bits);

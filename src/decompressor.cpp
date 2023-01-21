@@ -4,7 +4,6 @@
 #include "types.h"
 
 void read_node(FILE* file, Node* node) {
-    std::cout << ftell(file) << std::endl;
     bool node_type;
     fread(&node_type, sizeof(bool), NODE_TYPE_SIZE, file);
     node->leaf = node_type;
@@ -24,11 +23,9 @@ Node* read_tree(FILE* file) {
     Node* root = new Node;
     read_node(file, root);
     if (!root->leaf) {
-        std::cout << "INTERNAL NODE" << std::endl;
         root->left = read_tree(file);
         root->right = read_tree(file);
     }
-    std::cout << "LEAF NODE" << std::endl;
     return root;
 }
 
@@ -41,15 +38,15 @@ void printBT(const std::string& prefix, const Node* node, bool isLeft)
     // print the value of the node
     if (node->leaf) {
         if (node->pseudo)
-            std::cout << " - PSEUDO NODE";
+            std::cout << " PSEUDO NODE";
         else
             std::cout << '\'' << node->chr << "'";
     }
     std::cout << std::endl;
     if (!node->leaf) {
         // enter the next tree level - left and right branch
-        printBT( prefix + (isLeft ? "│ " : "  "), node->left, true);
-        printBT( prefix + (isLeft ? "│ " : "  "), node->right, false);
+        printBT( prefix + (isLeft ? "│  " : "   "), node->left, true);
+        printBT( prefix + (isLeft ? "│  " : "   "), node->right, false);
     }
 }
 
