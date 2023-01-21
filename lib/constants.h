@@ -2,6 +2,7 @@
 
 // Sizes
 // static const unsigned int ID_SIZE = sizeof(unsigned short);
+static const unsigned int NUM_NODES_SIZE = sizeof(unsigned short);
 static const unsigned int NODE_TYPE_SIZE = sizeof(bool);
 static const unsigned int PSEUDO_SIZE = sizeof(bool);
 static const unsigned int CHAR_SIZE = sizeof(char);

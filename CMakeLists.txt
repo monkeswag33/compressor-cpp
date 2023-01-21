@@ -8,4 +8,8 @@ add_executable(
     ${CMAKE_SOURCE_DIR}/serialization.cpp
     ${CMAKE_SOURCE_DIR}/compressor.cpp
 )
-add_executable(decompressor ${CMAKE_SOURCE_DIR}/decompressor.cpp)
+add_executable(
+    decompressor
+    ${CMAKE_SOURCE_DIR}/decompressor.cpp
+    ${CMAKE_SOURCE_DIR}/types.cpp
+)

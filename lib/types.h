@@ -5,7 +5,6 @@
 struct Node {
     bool leaf;
     unsigned int frequency;
-    unsigned short id;
     bool pseudo; // Pseudo symbol
     Node *left, *right; // Uninitialized if not internal
     char chr; // Uninitialized if not leaf

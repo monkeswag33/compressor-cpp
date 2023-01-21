@@ -26,9 +26,8 @@ Leaf node format:
 Character [char]
 */
 
-std::tuple<Node*, unsigned short> generate_tree(nodepq pq) {
+Node* generate_tree(nodepq pq) {
     Node t;
-    unsigned int num_nodes = pq.size();
     while (pq.size() > 1) {
         t = pq.top();
         Node *a = new Node;
@@ -40,18 +39,16 @@ std::tuple<Node*, unsigned short> generate_tree(nodepq pq) {
         pq.pop();
         Node temp;
         temp.leaf = false;
-        temp.id = num_nodes + 1;
         temp.left = a;
         temp.right = b;
         
         temp.frequency = a->frequency + b->frequency;
         pq.push(temp);
-        num_nodes += 1;
     }
     t = pq.top();
     Node* root = new Node;
     *root = t;
-    return { root, num_nodes };
+    return root;
 }
 
 void printBT(const std::string& prefix, const Node* node, bool isLeft)
@@ -61,12 +58,12 @@ void printBT(const std::string& prefix, const Node* node, bool isLeft)
     std::cout << (isLeft ? "├──" : "└──" );
 
     // print the value of the node
-    std::cout << ' ' << node->id;
     if (node->leaf) {
         std::cout << " - ";
-        std::cout << '\'' << node->chr << "'";
         if (node->pseudo)
             std::cout << " - PSEUDO NODE";
+        else
+            std::cout << '\'' << node->chr << "'";
     }
     std::cout << std::endl;
     if (!node->leaf) {
@@ -93,6 +90,8 @@ void gen_bitpair(Node* node, Node* parent, bitpair* bp, std::vector<unsigned cha
             cur_bits->push_back(0);
         if (node->pseudo) {
             if (cur_bits->size() >= BITS_PER_BYTE) {
+                delete parent->left;
+                delete parent->right;
                 parent->leaf = true;
                 parent->chr = parent->right->chr;
                 parent->frequency = parent->right->frequency;
@@ -108,18 +107,15 @@ void gen_bitpair(Node* node, Node* parent, bitpair* bp, std::vector<unsigned cha
 
 nodepq frequencies(std::string str) {
     std::set<char> unique(str.begin(), str.end());
-    unsigned int cur_id = 1;
     std::priority_queue<Node, std::vector<Node>, Compare> pq;
     for (char c : unique) {
         unsigned int frequency = std::count(str.begin(), str.end(), c);
         Node n;
-        n.id = cur_id;
         n.chr = c;
         n.frequency = frequency;
         n.leaf = true;
         n.pseudo = false;
         pq.push(n);
-        cur_id++;
     }
     return pq;
 }
@@ -157,11 +153,8 @@ long read_file(std::string filename, nodepq* pq) {
     }
     delete[] buffer;
     fclose(file);
-    unsigned short id = 1;
-    for (const auto& elem : charpair) {
-        pq->push({ .leaf = true, .frequency = elem.second, .id = id, .pseudo = false, .chr = elem.first });
-        id++;
-    }
+    for (const auto& elem : charpair)
+        pq->push({ .leaf = true, .frequency = elem.second, .pseudo = false, .chr = elem.first });
     return size;
 }
 
@@ -181,8 +174,8 @@ int main() {
     nodepq pq;
     std::string filename = "../file.txt";
     long size = read_file(filename, &pq);
-    pq.push({ .leaf = true, .frequency = 0, .id = 0, .pseudo = true });
-    auto [root, num_nodes] = generate_tree(pq);
+    pq.push({ .leaf = true, .frequency = 0, .pseudo = true });
+    Node* root = generate_tree(pq);
     bitpair bp;
     std::vector<unsigned char> pseudo_bits;
     {
@@ -192,7 +185,6 @@ int main() {
     printBT(root);
     print_bitpairs(&bp, &pseudo_bits);
     FILE* file = fopen("out.bin", "wb");
-    fwrite(&num_nodes, sizeof(num_nodes), 1, file);
     serialize_tree(root, file);
     std::cout << ftell(file) << std::endl;
     serialize_text(&bp, filename, size, file, &pseudo_bits);

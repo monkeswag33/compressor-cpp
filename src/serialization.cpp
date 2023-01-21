@@ -42,13 +42,12 @@ void serialize_tree(Node* root, FILE* file, char* biggest_node) {
 }
 
 void serialize_tree(Node* root, FILE* file) {
-    char* biggest_node = new char[std::max(INTERNAL_NODE_SIZE, LEAF_NODE_SIZE)];
+    char* biggest_node = new char[LEAF_NODE_SIZE];
     serialize_tree(root, file, biggest_node);
     delete[] biggest_node;
 }
 
 void write_bit(unsigned char bit, unsigned char* bit_count, unsigned char* byte, unsigned int* num_bytes, FILE* ptr) {
-    // std::cout << std::bitset<8>(*byte) << std::endl;
     *byte ^= (-bit ^ *byte) &  (1UL << *bit_count);
     (*bit_count)++;
     if (*bit_count == BITS_PER_BYTE) {
