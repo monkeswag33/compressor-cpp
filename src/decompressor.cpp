@@ -58,10 +58,8 @@ void printBT(const Node* node)
 int main() {
     std::string filename = "out.bin";
     FILE* file = fopen(filename.c_str(), "rb");
-    fseek(file, 0, SEEK_SET);
-    //unsigned short num_nodes;
-    //fread(&num_nodes, NUM_NODES_SIZE, 1, file);
     Node* root = read_tree(file);
+    
     printBT(root);
     fclose(file);
 }

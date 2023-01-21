@@ -74,7 +74,8 @@ void serialize_text(bitpair* bp, std::string filename, long fsize, FILE* ptr, st
     char* buffer = new char[BUFFER_SIZE];
     FILE* source = fopen(filename.c_str(), "rb");
     fseek(source, 0, SEEK_SET);
-    std::cout << ftell(ptr) << std::endl;
+    long num_bytes_offset = ftell(ptr);
+    fseek(ptr, sizeof(unsigned int), SEEK_CUR);
     for (int i = 0; i < full_chunks; i++) {
         fread(buffer, sizeof(char), BUFFER_SIZE, source);
         write_bytes(buffer, BUFFER_SIZE, bp, &bit_count, &int_byte, &num_bytes, ptr);
@@ -94,4 +95,6 @@ void serialize_text(bitpair* bp, std::string filename, long fsize, FILE* ptr, st
             }
         }
     }
+    fseek(ptr, num_bytes_offset, SEEK_SET);
+    fwrite(&num_bytes, sizeof(num_bytes), 1, ptr);
 }

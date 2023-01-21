@@ -178,7 +178,6 @@ int main() {
         gen_bitpair(root, nullptr, &bp, &temp, &pseudo_bits);
     }
     printBT(root);
-    //print_bitpairs(&bp, &pseudo_bits);
     FILE* file = fopen("out.bin", "wb");
     serialize_tree(root, file);
     serialize_text(&bp, filename, size, file, &pseudo_bits);
