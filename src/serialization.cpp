@@ -5,32 +5,36 @@
 #include "serialization.h"
 
 inline void serialize_common_node(Node* in, char* out) {
-    memcpy(out + ID_OFFSET, &(in->id), ID_SIZE);
     memcpy(out + NODE_TYPE_OFFSET, &(in->leaf), NODE_TYPE_SIZE);
 }
 
-void serialize_internal_node(Node* in, char* out) {
+inline void serialize_pseudo_node(Node* in, char* out) {
     serialize_common_node(in, out);
-    memcpy(out + LEFT_CHILD_OFFSET, &(in->left->id), ID_SIZE);
-    memcpy(out + RIGHT_CHILD_OFFSET, &(in->right->id), ID_SIZE);
+    memcpy(out + PSEUDO_OFFSET, &(in->pseudo), PSEUDO_SIZE);
 }
 
 void serialize_leaf_node(Node* in, char* out) {
-    serialize_common_node(in, out);
-    memcpy(out + PSEUDO_OFFSET, &(in->pseudo), PSEUDO_SIZE);
+    serialize_pseudo_node(in, out);
     memcpy(out + CHAR_OFFSET, &(in->chr), CHAR_SIZE);
 }
 
 void serialize_tree(Node* root, FILE* file, char* biggest_node) {
     unsigned int size;
     if (root->leaf) {
-        size = LEAF_NODE_SIZE;
-        serialize_leaf_node(root, biggest_node);
+        if (root->pseudo) {
+            std::cout << "PSEUDO NODE" << std::endl;
+            size = PSEUDO_NODE_SIZE;
+            serialize_pseudo_node(root, biggest_node);
+        } else {
+            size = LEAF_NODE_SIZE;
+            serialize_leaf_node(root, biggest_node);
+        }
     } else {
         size = INTERNAL_NODE_SIZE;
-        serialize_internal_node(root, biggest_node);
+        serialize_common_node(root, biggest_node);
     }
-    fwrite(biggest_node, size, 1, file);
+    std::cout << root->id << std::endl;
+    fwrite(biggest_node, sizeof(char), size, file);
     if (!root->leaf) {
         serialize_tree(root->left, file, biggest_node);
         serialize_tree(root->right, file, biggest_node);
