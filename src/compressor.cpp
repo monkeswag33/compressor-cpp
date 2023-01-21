@@ -68,8 +68,8 @@ void printBT(const std::string& prefix, const Node* node, bool isLeft)
     std::cout << std::endl;
     if (!node->leaf) {
         // enter the next tree level - left and right branch
-        printBT( prefix + (isLeft ? "│   " : "    "), node->left, true);
-        printBT( prefix + (isLeft ? "│   " : "    "), node->right, false);
+        printBT( prefix + (isLeft ? "│  " : "   "), node->left, true);
+        printBT( prefix + (isLeft ? "│  " : "   "), node->right, false);
     }
 }
 
@@ -186,7 +186,6 @@ int main() {
     print_bitpairs(&bp, &pseudo_bits);
     FILE* file = fopen("out.bin", "wb");
     serialize_tree(root, file);
-    std::cout << ftell(file) << std::endl;
     serialize_text(&bp, filename, size, file, &pseudo_bits);
     fclose(file);
     free_tree(root);

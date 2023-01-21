@@ -33,7 +33,6 @@ void serialize_tree(Node* root, FILE* file, char* biggest_node) {
         size = INTERNAL_NODE_SIZE;
         serialize_common_node(root, biggest_node);
     }
-    std::cout << root->id << std::endl;
     fwrite(biggest_node, sizeof(char), size, file);
     if (!root->leaf) {
         serialize_tree(root->left, file, biggest_node);
