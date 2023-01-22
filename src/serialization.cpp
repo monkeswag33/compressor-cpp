@@ -45,27 +45,27 @@ void serialize_tree(Node* root, FILE* file) {
     delete[] biggest_node;
 }
 
-void write_bit(unsigned char bit, unsigned char* bit_count, unsigned char* byte, unsigned int* num_bytes, FILE* ptr) {
-    *byte ^= (-bit ^ *byte) &  (1UL << *bit_count);
-    (*bit_count)++;
-    if (*bit_count == BITS_PER_BYTE) {
-        fwrite(byte, sizeof(*byte), 1, ptr);
-        (*num_bytes)++;
-        *byte = 0;
-        *bit_count = 0;
+void write_bit(unsigned char bit, unsigned char& bit_count, unsigned char& byte, unsigned int& num_bytes, FILE* ptr) {
+    byte ^= (-bit ^ byte) &  (1UL << bit_count);
+    (bit_count)++;
+    if (bit_count == BITS_PER_BYTE) {
+        fwrite(&byte, sizeof(byte), 1, ptr);
+        (num_bytes)++;
+        byte = 0;
+        bit_count = 0;
     }
 }
 
-void write_bytes(char* buffer, unsigned int bufsize, bitpair* bp, unsigned char* bit_count, unsigned char* int_byte, unsigned int* num_bytes, FILE* ptr) {
+void write_bytes(char* buffer, unsigned int bufsize, bitpair& bp, unsigned char& bit_count, unsigned char& int_byte, unsigned int& num_bytes, FILE* ptr) {
     for (unsigned int s = 0; s < bufsize; s++) {
         char c = buffer[s];
-        std::vector<unsigned char> bits = (*bp)[c];
+        std::vector<unsigned char> bits = bp[c];
         for (unsigned char bit : bits)
             write_bit(bit, bit_count, int_byte, num_bytes, ptr);
     }
 }
 
-void serialize_text(bitpair* bp, std::string filename, long fsize, FILE* ptr, std::vector<unsigned char>* pseudo_bits) {
+void serialize_text(bitpair& bp, std::string filename, long fsize, FILE* ptr, std::vector<unsigned char>& pseudo_bits) {
     unsigned int num_bytes = 0;
     unsigned char int_byte = 0; // Intermediate byte
     unsigned char bit_count = 0;
@@ -78,18 +78,18 @@ void serialize_text(bitpair* bp, std::string filename, long fsize, FILE* ptr, st
     fseek(ptr, sizeof(unsigned int), SEEK_CUR);
     for (int i = 0; i < full_chunks; i++) {
         fread(buffer, sizeof(char), BUFFER_SIZE, source);
-        write_bytes(buffer, BUFFER_SIZE, bp, &bit_count, &int_byte, &num_bytes, ptr);
+        write_bytes(buffer, BUFFER_SIZE, bp, bit_count, int_byte, num_bytes, ptr);
     }
     if (leftover_bytes) {
         fread(buffer, sizeof(char), leftover_bytes, source);
-        write_bytes(buffer, leftover_bytes, bp, &bit_count, &int_byte, &num_bytes, ptr);
+        write_bytes(buffer, leftover_bytes, bp, bit_count, int_byte, num_bytes, ptr);
     }
     delete[] buffer;
     fclose(source);
     if (bit_count) {
         while (bit_count) {
-            for (unsigned char bit : *pseudo_bits) {
-                write_bit(bit, &bit_count, &int_byte, &num_bytes, ptr);
+            for (unsigned char bit : pseudo_bits) {
+                write_bit(bit, bit_count, int_byte, num_bytes, ptr);
                 if (!bit_count)
                     break;
             }

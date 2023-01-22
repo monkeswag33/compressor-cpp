@@ -76,30 +76,30 @@ void printBT(const Node* node)
     printBT("", node, false);    
 }
 
-void gen_bitpair(Node* node, Node* parent, bitpair* bp, std::vector<unsigned char>* cur_bits, std::vector<unsigned char>* pseudo_bits) {
+void gen_bitpair(Node* node, Node* parent, bitpair& bp, std::vector<unsigned char>& cur_bits, std::vector<unsigned char>& pseudo_bits) {
     if (!node->leaf) {
-        std::vector<unsigned char> a = *cur_bits;
+        std::vector<unsigned char> a = cur_bits;
         a.push_back(0);
-        gen_bitpair(node->left, node, bp, &a, pseudo_bits);
-        cur_bits->push_back(1);
+        gen_bitpair(node->left, node, bp, a, pseudo_bits);
+        cur_bits.push_back(1);
         gen_bitpair(node->right, node, bp, cur_bits, pseudo_bits);
     } else {
-        if (!cur_bits->size())
-            cur_bits->push_back(0);
+        if (!cur_bits.size())
+            cur_bits.push_back(0);
         if (node->pseudo) {
-            if (cur_bits->size() >= BITS_PER_BYTE) {
+            if (cur_bits.size() >= BITS_PER_BYTE) {
                 delete parent->left;
                 delete parent->right;
                 parent->leaf = true;
                 parent->chr = parent->right->chr;
                 parent->frequency = parent->right->frequency;
                 parent->pseudo = false;
-                cur_bits->pop_back();
+                cur_bits.pop_back();
             }
-            *pseudo_bits = *cur_bits;
+            pseudo_bits = cur_bits;
         }
         else 
-            (*bp)[node->chr] = *cur_bits;
+            bp[node->chr] = cur_bits;
     }
 }
 
@@ -156,7 +156,7 @@ long read_file(std::string filename, nodepq* pq) {
     return size;
 }
 
-void print_bitpairs(bitpair* bp, std::vector<unsigned char>* pseudo_bits) {
+void print_bitpairs(bitpair* bp, std::vector<unsigned char>& pseudo_bits) {
     for (const auto& elem : *bp) {
         std::cout << '\'' << elem.first << '\'' << ": ";
         for (const auto& e : elem.second)
@@ -176,11 +176,11 @@ int main() {
     std::vector<unsigned char> pseudo_bits;
     {
         std::vector<unsigned char> temp;
-        gen_bitpair(root, nullptr, &bp, &temp, &pseudo_bits);
+        gen_bitpair(root, nullptr, bp, temp, pseudo_bits);
     }
     FILE* file = fopen("out.bin", "wb");
     serialize_tree(root, file);
-    serialize_text(&bp, filename, size, file, &pseudo_bits);
+    serialize_text(bp, filename, size, file, pseudo_bits);
     fclose(file);
     free_tree(root);
 }
