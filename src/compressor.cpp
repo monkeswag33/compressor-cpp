@@ -166,6 +166,7 @@ void print_bitpairs(bitpair* bp, std::vector<unsigned char>* pseudo_bits) {
 }
 
 int main() {
+    // TODO: incorporate pseudo node into node type
     nodepq pq;
     std::string filename = "../file.txt";
     long size = read_file(filename, &pq);
@@ -177,7 +178,6 @@ int main() {
         std::vector<unsigned char> temp;
         gen_bitpair(root, nullptr, &bp, &temp, &pseudo_bits);
     }
-    printBT(root);
     FILE* file = fopen("out.bin", "wb");
     serialize_tree(root, file);
     serialize_text(&bp, filename, size, file, &pseudo_bits);
