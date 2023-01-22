@@ -51,42 +51,42 @@ Node* generate_tree(nodepq pq) {
     return root;
 }
 
-void printBT(const std::string& prefix, const Node* node, bool isLeft)
+void printBT(const std::string& prefix, const Node& node, bool isLeft)
 {
     std::cout << prefix;
 
     std::cout << (isLeft ? "├──" : "└──" );
 
     // print the value of the node
-    if (node->leaf)
-        if (node->pseudo)
+    if (node.leaf)
+        if (node.pseudo)
             std::cout << " PSEUDO NODE";
         else
-            std::cout << '\'' << node->chr << "'";
+            std::cout << '\'' << node.chr << "'";
     std::cout << std::endl;
-    if (!node->leaf) {
+    if (!node.leaf) {
         // enter the next tree level - left and right branch
-        printBT( prefix + (isLeft ? "│  " : "   "), node->left, true);
-        printBT( prefix + (isLeft ? "│  " : "   "), node->right, false);
+        printBT( prefix + (isLeft ? "│  " : "   "), *node.left, true);
+        printBT( prefix + (isLeft ? "│  " : "   "), *node.right, false);
     }
 }
 
-void printBT(const Node* node)
+void printBT(const Node& node)
 {
     printBT("", node, false);    
 }
 
-void gen_bitpair(Node* node, Node* parent, bitpair& bp, std::vector<unsigned char>& cur_bits, std::vector<unsigned char>& pseudo_bits) {
-    if (!node->leaf) {
+void gen_bitpair(Node& node, Node* parent, bitpair& bp, std::vector<unsigned char>& cur_bits, std::vector<unsigned char>& pseudo_bits) {
+    if (!node.leaf) {
         std::vector<unsigned char> a = cur_bits;
         a.push_back(0);
-        gen_bitpair(node->left, node, bp, a, pseudo_bits);
+        gen_bitpair(*node.left, &node, bp, a, pseudo_bits);
         cur_bits.push_back(1);
-        gen_bitpair(node->right, node, bp, cur_bits, pseudo_bits);
+        gen_bitpair(*node.right, &node, bp, cur_bits, pseudo_bits);
     } else {
         if (!cur_bits.size())
             cur_bits.push_back(0);
-        if (node->pseudo) {
+        if (node.pseudo) {
             if (cur_bits.size() >= BITS_PER_BYTE) {
                 delete parent->left;
                 delete parent->right;
@@ -99,7 +99,7 @@ void gen_bitpair(Node* node, Node* parent, bitpair& bp, std::vector<unsigned cha
             pseudo_bits = cur_bits;
         }
         else 
-            bp[node->chr] = cur_bits;
+            bp[node.chr] = cur_bits;
     }
 }
 
@@ -176,7 +176,7 @@ int main() {
     std::vector<unsigned char> pseudo_bits;
     {
         std::vector<unsigned char> temp;
-        gen_bitpair(root, nullptr, bp, temp, pseudo_bits);
+        gen_bitpair(*root, nullptr, bp, temp, pseudo_bits);
     }
     FILE* file = fopen("out.bin", "wb");
     serialize_tree(root, file);
