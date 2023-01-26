@@ -3,27 +3,23 @@
 #include <bitset>
 #include "constants.h"
 #include "types.h"
+#include "util.h"
 
 void read_node(FILE* file, Node* node) {
-    bool node_type;
+    unsigned char node_type;
     fread(&node_type, sizeof(bool), NODE_TYPE_SIZE, file);
-    node->leaf = node_type;
-    if (node_type) {
-        bool pseudo_node;
-        fread(&pseudo_node, sizeof(bool), PSEUDO_SIZE, file);
-        node->pseudo = pseudo_node;
-        if (!pseudo_node) {
-            char c;
-            fread(&c, sizeof(char), CHAR_SIZE, file);
-            node->chr = c;
-        }
+    node->type = static_cast<NodeType>(node_type);
+    if (node->type == LEAF_NODE) {
+        char c;
+        fread(&c, sizeof(char), CHAR_SIZE, file);
+        node->chr = c;
     }
 }
 
 Node* read_tree(FILE* file) {
     Node* root = new Node;
     read_node(file, root);
-    if (!root->leaf) {
+    if (root->type == INTERNAL_NODE) {
         root->left = read_tree(file);
         root->right = read_tree(file);
     }
@@ -50,19 +46,17 @@ void get_chars(const char* const buffer, const unsigned int bufsize, char* const
             cur_node = cur_node->right;
         else
             cur_node = cur_node->left;
-        if (cur_node->leaf) {
-            if (!cur_node->pseudo) {
-                outbuf[out_byte_count] = cur_node->chr;
-                out_byte_count++;
-                if (out_byte_count == BUFFER_SIZE)
-                    fwrite(outbuf, sizeof(char), BUFFER_SIZE, outfile);
-            }
-            cur_node = root;
+        if (cur_node->type == LEAF_NODE) {
+            outbuf[out_byte_count] = cur_node->chr;
+            out_byte_count++;
+            if (out_byte_count == BUFFER_SIZE)
+                fwrite(outbuf, sizeof(char), BUFFER_SIZE, outfile);
         }
+        if (cur_node->type != INTERNAL_NODE)
+            cur_node = root;
     }
     if (out_byte_count)
         fwrite(outbuf, sizeof(char), out_byte_count, outfile);
-    std::cout << std::endl;
 }
 
 void read_file_contents(FILE* file, FILE* outfile, const unsigned int num_bytes, Node* const root) {
@@ -81,32 +75,6 @@ void read_file_contents(FILE* file, FILE* outfile, const unsigned int num_bytes,
     }
     delete[] buffer;
     delete[] outbuf;
-}
-
-void printBT(const std::string& prefix, const Node* node, bool isLeft)
-{
-    std::cout << prefix;
-
-    std::cout << (isLeft ? "├──" : "└──" );
-
-    // print the value of the node
-    if (node->leaf) {
-        if (node->pseudo)
-            std::cout << " PSEUDO NODE";
-        else
-            std::cout << '\'' << node->chr << "'";
-    }
-    std::cout << std::endl;
-    if (!node->leaf) {
-        // enter the next tree level - left and right branch
-        printBT( prefix + (isLeft ? "│  " : "   "), node->left, true);
-        printBT( prefix + (isLeft ? "│  " : "   "), node->right, false);
-    }
-}
-
-void printBT(const Node* node)
-{
-    printBT("", node, false);    
 }
 
 int main() {
