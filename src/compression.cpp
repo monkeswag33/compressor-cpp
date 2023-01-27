@@ -115,23 +115,22 @@ void get_counts(char* buffer, unsigned int size, std::map<char, unsigned int>* c
 
 long read_file(std::string filename, nodepq* pq) {
     std::map<char, unsigned int> charpair;
-    FILE* file = fopen(filename.c_str(), "rb");
+    std::ifstream file(filename, std::ios::binary | std::ios::ate);
     char* buffer = new char[BUFFER_SIZE];
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    long size = file.tellg();
+    file.seekg(0);
     unsigned int full_chunks = size / BUFFER_SIZE;
     for (int i = 0; i < full_chunks; i++) {
-        fread(buffer, sizeof(char), BUFFER_SIZE, file);
+        file.read(buffer, BUFFER_SIZE);
         get_counts(buffer, BUFFER_SIZE, &charpair);
     }
     unsigned int leftover_bytes = size % BUFFER_SIZE;
     if (leftover_bytes) {
-        fread(buffer, sizeof(char), leftover_bytes, file);
+        file.read(buffer, leftover_bytes);
         get_counts(buffer, leftover_bytes, &charpair);
     }
     delete[] buffer;
-    fclose(file);
+    file.close();
     for (const auto& elem : charpair)
         pq->push({ .type = LEAF_NODE, .frequency = elem.second, .chr = elem.first });
     return size;
@@ -143,7 +142,6 @@ void compress_file(std::ofstream& file, std::string filename) {
     nodepq pq;
     file << base;
     file << '\0';
-    std::cout << file.tellp() << std::endl;
     long size = read_file(filename, &pq);
     pq.push({ .type = PSEUDO_NODE, .frequency = 0 });
     Node* root = generate_tree(pq);

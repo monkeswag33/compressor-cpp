@@ -90,6 +90,6 @@ void serialize_text(bitpair& bp, std::string filename, long fsize, std::ofstream
             }
         }
     }
-    ptr.seekp(num_bytes_offset, std::ios::beg);
+    ptr.seekp(num_bytes_offset);
     ptr << num_bytes;
 }

@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
         compress_file(file, entry.path());
         num_files++;
     }
-    file.seekp(0, std::ios::beg);
+    file.seekp(0);
     file << num_files;
     file.close();
     return 0;
