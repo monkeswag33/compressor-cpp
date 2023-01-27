@@ -122,10 +122,9 @@ void read_file(std::ifstream& file, long size, nodepq* pq) {
 void compress_file(std::ofstream& file, std::string filename) {
     std::string base = filename.substr(filename.find_last_of("/\\") + 1);
     nodepq pq;
-    file << base;
-    file << '\0';
+    file << base << '\0';
     std::ifstream source(filename, std::ios::binary | std::ios::ate);
-    long size = source.tellg();
+    unsigned long size = source.tellg();
     read_file(source, size, &pq);
     pq.push({ .type = PSEUDO_NODE, .frequency = 0 });
     Node* root = generate_tree(pq);

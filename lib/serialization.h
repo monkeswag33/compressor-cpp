@@ -5,4 +5,4 @@
 
 void serialize_tree(Node*, std::ofstream&, char*);
 void serialize_tree(Node*, std::ofstream&);
-void serialize_text(bitpair&, std::ifstream&, long, std::ofstream&, std::vector<unsigned char>&);
+void serialize_text(bitpair&, std::ifstream&, unsigned long, std::ofstream&, std::vector<unsigned char>&);

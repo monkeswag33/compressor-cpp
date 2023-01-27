@@ -11,15 +11,18 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     std::string directory = argv[1];
-    std::string out_file = directory.substr(directory.find_last_of("/\\") + 1) + ".cmp";
+    std::string base_dir = directory.substr(directory.find_last_of("/\\") + 1);
+    std::string out_file = base_dir + ".cmp";
     std::ofstream file(out_file, std::ios::binary | std::ios::trunc);
-    file.seekp(sizeof(unsigned int));
+    file << base_dir << '\0';
+    unsigned int offset = file.tellp();
+    file.seekp(sizeof(unsigned int), std::ios::cur);
     unsigned int num_files = 0;
     for (const auto& entry : fs::directory_iterator(directory)) {
         compress_file(file, entry.path());
         num_files++;
     }
-    file.seekp(0);
+    file.seekp(offset);
     file << num_files;
     file.close();
     return 0;

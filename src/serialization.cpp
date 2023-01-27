@@ -26,20 +26,11 @@ void write_bit(unsigned char bit, unsigned char& bit_count, unsigned char& byte,
     }
 }
 
-void write_bytes(char* buffer, unsigned int bufsize, bitpair& bp, unsigned char& bit_count, unsigned char& int_byte, unsigned int& num_bytes, std::ofstream& ptr) {
-    for (unsigned int s = 0; s < bufsize; s++) {
-        char c = buffer[s];
-        std::vector<unsigned char> bits = bp[c];
-        for (unsigned char bit : bits)
-            write_bit(bit, bit_count, int_byte, num_bytes, ptr);
-    }
-}
-
-void serialize_text(bitpair& bp, std::ifstream& source, long fsize, std::ofstream& ptr, std::vector<unsigned char>& pseudo_bits) {
+void serialize_text(bitpair& bp, std::ifstream& source, unsigned long fsize, std::ofstream& ptr, std::vector<unsigned char>& pseudo_bits) {
     unsigned int num_bytes = 0;
     unsigned char int_byte = 0; // Intermediate byte
     unsigned char bit_count = 0;
-    long num_bytes_offset = ptr.tellp();
+    unsigned long num_bytes_offset = ptr.tellp();
     ptr.seekp(sizeof(unsigned int), std::ios::cur);
     char c;
     for (int i = 0; i < fsize; i++) {
