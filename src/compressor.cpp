@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include "compression.h"
+#include "constants.h"
 namespace fs = std::filesystem;
 
 int main(int argc, char* argv[]) {
@@ -11,8 +12,8 @@ int main(int argc, char* argv[]) {
     }
     std::string directory = argv[1];
     std::string out_file = directory.substr(directory.find_last_of("/\\") + 1) + ".cmp";
-    std::ofstream file(out_file, std::ofstream::binary);
-    file.seekp(sizeof(unsigned int), std::ios::beg);
+    std::ofstream file(out_file, std::ios::binary | std::ios::trunc);
+    file.seekp(sizeof(unsigned int));
     unsigned int num_files = 0;
     for (const auto& entry : fs::directory_iterator(directory)) {
         compress_file(file, entry.path());

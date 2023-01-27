@@ -107,48 +107,32 @@ void free_tree(Node* root) {
     delete root;
 }
 
-void get_counts(char* buffer, unsigned int size, std::map<char, unsigned int>* charpair) {
-    std::set<char> unique(buffer, buffer + size);
-    for (char c : unique)
-        (*charpair)[c] += std::count(buffer, buffer + size, c);
-}
-
-long read_file(std::string filename, nodepq* pq) {
+void read_file(std::ifstream& file, long size, nodepq* pq) {
     std::map<char, unsigned int> charpair;
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
-    char* buffer = new char[BUFFER_SIZE];
-    long size = file.tellg();
     file.seekg(0);
-    unsigned int full_chunks = size / BUFFER_SIZE;
-    for (int i = 0; i < full_chunks; i++) {
-        file.read(buffer, BUFFER_SIZE);
-        get_counts(buffer, BUFFER_SIZE, &charpair);
+    char c;
+    for (int i = 0; i < size; i++) {
+        file >> c;
+        charpair[c]++;
     }
-    unsigned int leftover_bytes = size % BUFFER_SIZE;
-    if (leftover_bytes) {
-        file.read(buffer, leftover_bytes);
-        get_counts(buffer, leftover_bytes, &charpair);
-    }
-    delete[] buffer;
-    file.close();
     for (const auto& elem : charpair)
         pq->push({ .type = LEAF_NODE, .frequency = elem.second, .chr = elem.first });
-    return size;
 }
 
 void compress_file(std::ofstream& file, std::string filename) {
-    // TODO: incorporate pseudo node into node type
     std::string base = filename.substr(filename.find_last_of("/\\") + 1);
     nodepq pq;
     file << base;
     file << '\0';
-    long size = read_file(filename, &pq);
+    std::ifstream source(filename, std::ios::binary | std::ios::ate);
+    long size = source.tellg();
+    read_file(source, size, &pq);
     pq.push({ .type = PSEUDO_NODE, .frequency = 0 });
     Node* root = generate_tree(pq);
     bitpair bp;
     std::vector<unsigned char> pseudo_bits;
     gen_bitpair(root, bp, pseudo_bits);
     serialize_tree(root, file);
-    serialize_text(bp, filename, size, file, pseudo_bits);
+    serialize_text(bp, source, size, file, pseudo_bits);
     free_tree(root);
 }
