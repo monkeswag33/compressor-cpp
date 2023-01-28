@@ -2,16 +2,18 @@
 #include <iostream>
 #include <bitset>
 #include <fstream>
+#include <filesystem>
 #include "constants.h"
 #include "types.h"
 #include "util.h"
+namespace fs = std::filesystem;
 
 void read_node(std::ifstream& file, Node* node) {
     unsigned char node_type;
-    file >> node_type;
+    file.read(reinterpret_cast<char*>(&node_type), sizeof(node_type));
     node->type = static_cast<NodeType>(node_type);
     if (node->type == LEAF_NODE)
-        file >> node->chr;
+        file.read(&(node->chr), sizeof(node->chr));
 }
 
 Node* read_tree(std::ifstream& file) {
@@ -43,13 +45,15 @@ void read_file_contents(std::ifstream& file, std::ofstream& outfile, const unsig
         file >> c;
         for (int i = 0; i < BITS_PER_BYTE; i++) {
             unsigned char bit = get_bit(c, byte_count, bit_count);
-            if (bit)
+            if (bit) {
                 cur_node = cur_node->right;
-            else
+            } else {
                 cur_node = cur_node->left;
-            if (cur_node->type == LEAF_NODE)
-                outfile << cur_node->chr;
-            else if (cur_node->type != INTERNAL_NODE)
+            }
+            if (cur_node->type == LEAF_NODE) {
+                outfile.write(&(cur_node->chr), sizeof(cur_node->chr));
+            }
+            if (cur_node->type != INTERNAL_NODE)
                 cur_node = root;
         }
     }
@@ -57,17 +61,26 @@ void read_file_contents(std::ifstream& file, std::ofstream& outfile, const unsig
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        std::cout << "Please pass the filename to decompress";
+        std::cout << "Please pass the filename to decompress\n";
         return 1;
     }
     std::string filename = argv[1];
     std::ifstream file(filename, std::ios::binary);
-    std::string out_filename = "decompressed.txt";
-    std::ofstream outfile(out_filename, std::ios::binary | std::ios::trunc);
-    Node* root = read_tree(file);
-    unsigned int num_bytes;
-    file >> num_bytes;
-    read_file_contents(file, outfile, num_bytes, root);
+    std::string out_dir;
+    std::getline(file, out_dir, '\0');
+    fs::create_directory(out_dir);
+    unsigned int num_files;
+    file.read(reinterpret_cast<char*>(&num_files), sizeof(num_files));
+    std::string out_file;
+    for (int i = 0; i < num_files; i++) {
+        std::getline(file, out_file, '\0');
+        std::ofstream outfile(out_dir + '/' + out_file, std::ios::binary | std::ios::trunc);
+        Node* root = read_tree(file);
+        unsigned int num_bytes;
+        file.read(reinterpret_cast<char*>(&num_bytes), sizeof(num_bytes));
+        read_file_contents(file, outfile, num_bytes, root);
+        outfile.close();
+        free_tree(root);
+    }
     file.close();
-    outfile.close();
 }

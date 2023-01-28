@@ -6,9 +6,9 @@
 
 void serialize_tree(Node* root, std::ofstream& file) {
     unsigned int size;
-    file << root->type;
+    file.write(reinterpret_cast<char*>(&(root->type)), sizeof(root->type));
     if (root->type == LEAF_NODE)
-        file << root->chr;
+        file.write(&(root->chr), sizeof(root->chr));
     else if (root->type == INTERNAL_NODE) {
         serialize_tree(root->left, file);
         serialize_tree(root->right, file);
@@ -16,11 +16,10 @@ void serialize_tree(Node* root, std::ofstream& file) {
 }
 
 void write_bit(unsigned char bit, unsigned char& bit_count, unsigned char& byte, unsigned int& num_bytes, std::ofstream& ptr) {
-    byte ^= (-bit ^ byte) &  (1UL << bit_count);
-    (bit_count)++;
-    if (bit_count == BITS_PER_BYTE) {
-        ptr << byte;
-        (num_bytes)++;
+    byte ^= (-bit ^ byte) & (1UL << bit_count);
+    if (++bit_count == BITS_PER_BYTE) {
+        ptr.write(reinterpret_cast<char*>(&byte), sizeof(byte));
+        num_bytes++;
         byte = 0;
         bit_count = 0;
     }
@@ -32,9 +31,10 @@ void serialize_text(bitpair& bp, std::ifstream& source, unsigned long fsize, std
     unsigned char bit_count = 0;
     unsigned long num_bytes_offset = ptr.tellp();
     ptr.seekp(sizeof(unsigned int), std::ios::cur);
+    source.seekg(0);
     char c;
     for (int i = 0; i < fsize; i++) {
-        source >> c;
+        source.read(&c, sizeof(c));
         std::vector<unsigned char> bits = bp[c];
         for (unsigned char bit : bits)
             write_bit(bit, bit_count, int_byte, num_bytes, ptr);
@@ -50,5 +50,5 @@ void serialize_text(bitpair& bp, std::ifstream& source, unsigned long fsize, std
         }
     }
     ptr.seekp(num_bytes_offset);
-    ptr << num_bytes;
+    ptr.write(reinterpret_cast<char*>(&num_bytes), sizeof(num_bytes));
 }

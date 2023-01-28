@@ -11,6 +11,7 @@
 #include "types.h"
 #include "serialization.h"
 #include "compression.h"
+#include "util.h"
 
 /*
 Common node format:
@@ -99,20 +100,12 @@ nodepq frequencies(std::string str) {
     return pq;
 }
 
-void free_tree(Node* root) {
-    if (root->type == INTERNAL_NODE) {
-        free_tree(root->left);
-        free_tree(root->right);
-    }
-    delete root;
-}
-
 void read_file(std::ifstream& file, long size, nodepq* pq) {
     std::map<char, unsigned int> charpair;
     file.seekg(0);
     char c;
     for (int i = 0; i < size; i++) {
-        file >> c;
+        file.read(&c, sizeof(c));
         charpair[c]++;
     }
     for (const auto& elem : charpair)
@@ -122,7 +115,7 @@ void read_file(std::ifstream& file, long size, nodepq* pq) {
 void compress_file(std::ofstream& file, std::string filename) {
     std::string base = filename.substr(filename.find_last_of("/\\") + 1);
     nodepq pq;
-    file << base << '\0';
+    write_string(base, file);
     std::ifstream source(filename, std::ios::binary | std::ios::ate);
     unsigned long size = source.tellg();
     read_file(source, size, &pq);
@@ -133,5 +126,6 @@ void compress_file(std::ofstream& file, std::string filename) {
     gen_bitpair(root, bp, pseudo_bits);
     serialize_tree(root, file);
     serialize_text(bp, source, size, file, pseudo_bits);
+    file.seekp(0, std::ios::end);
     free_tree(root);
 }

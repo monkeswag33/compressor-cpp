@@ -1,8 +1,9 @@
 #include "util.h"
 #include <iostream>
+#include <fstream>
 
-void print_bitpairs(bitpair* bp) {
-    for (const auto& elem : *bp) {
+void print_bitpairs(const bitpair& bp) {
+    for (const auto& elem : bp) {
         std::cout << '\'' << elem.first << '\'' << ": ";
         for (const auto& e : elem.second)
             std::cout << +e;
@@ -35,4 +36,12 @@ void printBT(const std::string& prefix, const Node& node, bool isLeft)
 void printBT(const Node& node)
 {
     printBT("", node, false);    
+}
+
+void free_tree(const Node* root) {
+    if (root->type == INTERNAL_NODE) {
+        free_tree(root->left);
+        free_tree(root->right);
+    }
+    delete root;
 }
