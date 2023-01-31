@@ -7,11 +7,14 @@
 #include <cstring>
 #include <map>
 #include <bitset>
+#include <filesystem>
 #include "constants.h"
 #include "types.h"
 #include "serialization.h"
 #include "compression.h"
 #include "util.h"
+
+namespace fs = std::filesystem;
 
 /*
 Common node format:
@@ -112,10 +115,9 @@ void read_file(std::ifstream& file, long size, nodepq* pq) {
         pq->push({ .type = LEAF_NODE, .frequency = elem.second, .chr = elem.first });
 }
 
-void compress_file(std::ofstream& file, std::string filename) {
-    std::string base = filename.substr(filename.find_last_of("/\\") + 1);
+void compress_file(std::ofstream& file, const fs::path& filename) {
     nodepq pq;
-    write_string(base, file);
+    write_string(filename.filename(), file);
     std::ifstream source(filename, std::ios::binary | std::ios::ate);
     unsigned long size = source.tellg();
     read_file(source, size, &pq);

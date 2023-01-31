@@ -59,6 +59,28 @@ void read_file_contents(std::ifstream& file, std::ofstream& outfile, const unsig
     }
 }
 
+void decompress_file(std::ifstream& file, std::string out_dir) {
+    std::string out_file;
+    std::getline(file, out_file, '\0');
+    std::ofstream outfile(out_dir + '/' + out_file, std::ios::binary | std::ios::trunc);
+    Node* root = read_tree(file);
+    unsigned int num_bytes;
+    file.read(reinterpret_cast<char*>(&num_bytes), sizeof(num_bytes));
+    read_file_contents(file, outfile, num_bytes, root);
+    outfile.close();
+    free_tree(root);
+}
+
+void decompress_dir(std::ifstream& file) {
+    std::string out_dir;
+    std::getline(file, out_dir, '\0');
+    fs::create_directory(out_dir);
+    unsigned int num_files;
+    file.read(reinterpret_cast<char*>(&num_files), sizeof(num_files));
+    for (int i = 0; i < num_files; i++)
+        decompress_file(file, out_dir);
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         std::cout << "Please pass the filename to decompress\n";
@@ -66,21 +88,11 @@ int main(int argc, char* argv[]) {
     }
     std::string filename = argv[1];
     std::ifstream file(filename, std::ios::binary);
-    std::string out_dir;
-    std::getline(file, out_dir, '\0');
-    fs::create_directory(out_dir);
-    unsigned int num_files;
-    file.read(reinterpret_cast<char*>(&num_files), sizeof(num_files));
-    std::string out_file;
-    for (int i = 0; i < num_files; i++) {
-        std::getline(file, out_file, '\0');
-        std::ofstream outfile(out_dir + '/' + out_file, std::ios::binary | std::ios::trunc);
-        Node* root = read_tree(file);
-        unsigned int num_bytes;
-        file.read(reinterpret_cast<char*>(&num_bytes), sizeof(num_bytes));
-        read_file_contents(file, outfile, num_bytes, root);
-        outfile.close();
-        free_tree(root);
-    }
+    bool is_dir;
+    file.read(reinterpret_cast<char*>(&is_dir), sizeof(is_dir));
+    if (is_dir)
+        decompress_dir(file);
+    else
+        decompress_file(file, ".");
     file.close();
 }

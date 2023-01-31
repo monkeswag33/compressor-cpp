@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
 #include <fstream>
+#include <filesystem>
 
-void compress_file(std::ofstream&, std::string);
+void compress_file(std::ofstream&, const std::filesystem::path&);
