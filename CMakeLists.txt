@@ -1,12 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(HuffmanCoding CXX)
 set(CMAKE_CXX_STANDARD 17)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)
-endif()
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-    message(STATUS "Enabling tests...")
-    add_subdirectory(tests)
+    if(BUILD_TESTING)
+        add_subdirectory(tests)
+    endif()
 endif()
 add_library(compression STATIC
     src/compression.cpp

@@ -1,4 +1,5 @@
 configure_file(data/OneFile.txt ${CMAKE_CURRENT_BINARY_DIR}/ COPYONLY)
 add_executable(TestOneFile TestOneFile.cpp)
 target_link_libraries(TestOneFile compression)
+set_property(TARGET TestOneFile APPEND PROPERTY ADDITIONAL_CLEAN_FILES OneFile.cmp OneFile.txt.dcmp)
 add_test(NAME TestOneFile COMMAND TestOneFile)

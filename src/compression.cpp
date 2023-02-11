@@ -61,7 +61,7 @@ void gen_bitpair(Node& node, Node* parent, bitpair& bp, std::vector<unsigned cha
         break;
     }
     case PSEUDO_NODE:
-        if (cur_bits.size() >= 8) {
+        if (cur_bits.size() > 8) {
             parent->type = LEAF_NODE;
             if (parent->right == &node) {
                 parent->chr = parent->left->chr;
