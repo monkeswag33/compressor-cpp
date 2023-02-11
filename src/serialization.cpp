@@ -1,8 +1,5 @@
-#include <cstring>
-#include <iostream>
-#include <bitset>
-#include "constants.h"
-#include "serialization.h"
+#include <fstream>
+#include "types.h"
 
 void serialize_tree(Node* root, std::ofstream& file) {
     unsigned int size;
@@ -17,7 +14,7 @@ void serialize_tree(Node* root, std::ofstream& file) {
 
 void write_bit(unsigned char bit, unsigned char& bit_count, unsigned char& byte, unsigned int& num_bytes, std::ofstream& ptr) {
     byte ^= (-bit ^ byte) & (1UL << bit_count);
-    if (++bit_count == BITS_PER_BYTE) {
+    if (++bit_count == 8) {
         ptr.write(reinterpret_cast<char*>(&byte), sizeof(byte));
         num_bytes++;
         byte = 0;

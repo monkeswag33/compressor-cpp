@@ -1,6 +1,5 @@
 #include "util.h"
 #include <iostream>
-#include <fstream>
 
 void print_bitpairs(const bitpair& bp) {
     for (const auto& elem : bp) {
@@ -11,31 +10,31 @@ void print_bitpairs(const bitpair& bp) {
     }
 }
 
-void printBT(const std::string& prefix, const Node& node, bool isLeft)
+void printBT(const std::string& prefix, const Node* node, bool isLeft)
 {
     std::cout << prefix;
 
     std::cout << (isLeft ? "├──" : "└──" );
 
     // print the value of the node
-    switch (node.type) {
+    switch (node->type) {
     case LEAF_NODE:
-        std::cout << '\'' << node.chr << "'";
+        std::cout << '\'' << node->chr << "'";
         break;
     case PSEUDO_NODE:
         std::cout << " PSEUDO NODE";
         break;
     }
     std::cout << std::endl;
-    if (node.type == INTERNAL_NODE) {
-        printBT( prefix + (isLeft ? "│  " : "   "), *node.left, true);
-        printBT( prefix + (isLeft ? "│  " : "   "), *node.right, false);
+    if (node->type == INTERNAL_NODE) {
+        printBT( prefix + (isLeft ? "│  " : "   "), node->left, true);
+        printBT( prefix + (isLeft ? "│  " : "   "), node->right, false);
     }
 }
 
 void printBT(const Node& node)
 {
-    printBT("", node, false);    
+    printBT("", &node, false);    
 }
 
 void free_tree(const Node* root) {

@@ -1,19 +1,12 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <set>
-#include <algorithm>
-#include <cstdio>
-#include <cstring>
-#include <map>
-#include <bitset>
+#include <string>
 #include <filesystem>
-#include "constants.h"
+#include <set>
+#include <fstream>
+#include <algorithm>
+#include <iostream> // REMOVE LATER!!!!
 #include "types.h"
-#include "serialization.h"
-#include "compression.h"
 #include "util.h"
-
+#include "serialization.h"
 namespace fs = std::filesystem;
 
 /*
@@ -68,13 +61,19 @@ void gen_bitpair(Node& node, Node* parent, bitpair& bp, std::vector<unsigned cha
         break;
     }
     case PSEUDO_NODE:
-        if (cur_bits.size() >= BITS_PER_BYTE) {
+        if (cur_bits.size() >= 8) {
+            parent->type = LEAF_NODE;
+            if (parent->right == &node) {
+                parent->chr = parent->left->chr;
+                parent->frequency = parent->left->frequency;
+            } else {
+                parent->chr = parent->right->chr;
+                parent->frequency = parent->right->frequency;
+            }
+            cur_bits.pop_back();
+            bp[parent->chr] = cur_bits;
             delete parent->left;
             delete parent->right;
-            parent->type = LEAF_NODE;
-            parent->chr = parent->right->chr;
-            parent->frequency = parent->right->frequency;
-            cur_bits.pop_back();
         }
         pseudo_bits = cur_bits;
         break;
@@ -115,7 +114,7 @@ void read_file(std::ifstream& file, long size, nodepq* pq) {
         pq->push({ .type = LEAF_NODE, .frequency = elem.second, .chr = elem.first });
 }
 
-void compress_file(std::ofstream& file, const fs::path& filename) {
+void compress_file(std::ofstream& file, const fs::path filename) {
     nodepq pq;
     write_string(filename.filename(), file);
     std::ifstream source(filename, std::ios::binary | std::ios::ate);
@@ -130,4 +129,38 @@ void compress_file(std::ofstream& file, const fs::path& filename) {
     serialize_text(bp, source, size, file, pseudo_bits);
     file.seekp(0, std::ios::end);
     free_tree(root);
+}
+
+void compress_file(const fs::path filename, std::string out_file) {
+    fs::path fn;
+    if (out_file == "")
+        fn = filename.stem().replace_extension(".cmp");
+    else
+        fn = out_file;
+    std::ofstream file(fn, std::ios::binary);
+    char tmp = 0;
+    file.write(&tmp, 1);
+    compress_file(file, filename);
+    file.close();
+}
+
+void compress_dir(std::ofstream& file, const fs::path path) {
+    write_string(path.filename(), file);
+    unsigned int offset = file.tellp();
+    file.seekp(sizeof(unsigned int), std::ios::cur);
+    unsigned int num_files = 0;
+    for (const auto& entry : fs::directory_iterator(path)) {
+        compress_file(file, entry.path());
+        num_files++;
+    }
+    file.seekp(offset);
+    file.write(reinterpret_cast<char*>(&num_files), sizeof(num_files));
+}
+
+void compress_dir(const fs::path path) {
+    std::ofstream file(path.stem().append(".cmp"), std::ios::binary);
+    char tmp = 1;
+    file.write(&tmp, 1);
+    compress_dir(file, path);
+    file.close();
 }
