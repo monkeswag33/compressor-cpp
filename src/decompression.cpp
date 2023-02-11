@@ -1,6 +1,4 @@
-#include <filesystem>
 #include <fstream>
-#include <iostream>
 #include "compression.h"
 #include "util.h"
 #include "types.h"
