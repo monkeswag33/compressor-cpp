@@ -6,7 +6,7 @@
 namespace fs = std::filesystem;
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
+    if (argc < 2) {
         std::cout << "Please pass directory to compress\n";
         return 1;
     }
@@ -18,8 +18,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Path does not exist\n";
         return 1;
     }
-    std::string out_file = path.stem().string() + ".cmp";
-    std::ofstream file(out_file, std::ios::binary | std::ios::trunc);
+    std::ofstream file(argc == 3 ? argv[2] : path.stem().string() + ".cmp", std::ios::binary | std::ios::trunc);
     bool is_dir = fs::is_directory(path);
     file.write(reinterpret_cast<char*>(&is_dir), 1);
     if (is_dir)
