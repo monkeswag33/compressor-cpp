@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include "compression.h"
 
 int main(int argc, char* argv[]) {
@@ -12,7 +13,7 @@ int main(int argc, char* argv[]) {
     bool is_dir;
     file.read(reinterpret_cast<char*>(&is_dir), sizeof(is_dir));
     if (is_dir)
-        decompress_dir(file);
+        decompress_dir(file, "");
     else
         decompress_file(file, ".", "");
     file.close();

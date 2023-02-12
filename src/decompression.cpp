@@ -6,7 +6,6 @@ namespace fs = std::filesystem;
 
 void read_node(std::ifstream& file, Node* node) {
     file.read(reinterpret_cast<char*>(&(node->type)), sizeof(node->type));
-    // std::cout << (node->type == INTERNAL_NODE) << '\n';
     if (node->type == LEAF_NODE)
         file.read(&(node->chr), sizeof(node->chr));
 }
@@ -23,7 +22,6 @@ Node* read_tree(std::ifstream& file) {
 
 void read_file_contents(std::ifstream& file, std::ofstream& outfile, const unsigned int num_bytes, Node* const root) {
     Node* cur_node = root;
-    // std::cout << cur_node->type;
     char c;
     for (int i = 0; i < num_bytes; i++) {
         file.read(&c, sizeof(c));
@@ -42,7 +40,7 @@ void read_file_contents(std::ifstream& file, std::ofstream& outfile, const unsig
     }
 }
 
-void decompress_file(std::ifstream& file, fs::path out_dir, std::string out_file) {
+void decompress_file(std::ifstream& file, const fs::path out_dir, std::string out_file) {
     std::filesystem::create_directories(out_dir);
     if (out_file == "")
         std::getline(file, out_file, '\0');
@@ -57,16 +55,18 @@ void decompress_file(std::ifstream& file, fs::path out_dir, std::string out_file
     free_tree(root);
 }
 
-void decompress_file(fs::path filename, std::string out_file) {
+void decompress_file(const fs::path filename, std::string out_file) {
     std::ifstream file(filename, std::ios::binary);
     file.seekg(1);
     decompress_file(file, ".", out_file);
     file.close();
 }
 
-void decompress_dir(std::ifstream& file) {
-    std::string out_dir;
-    std::getline(file, out_dir, '\0');
+void decompress_dir(std::ifstream& file, std::string out_dir) {
+    if (out_dir == "")
+        std::getline(file, out_dir, '\0');
+    else
+        file.ignore(256, '\0');
     fs::create_directory(out_dir);
     unsigned int num_files;
     file.read(reinterpret_cast<char*>(&num_files), sizeof(num_files));
@@ -74,9 +74,9 @@ void decompress_dir(std::ifstream& file) {
         decompress_file(file, out_dir, "");
 }
 
-void decompress_dir(fs::path& filename) {
+void decompress_dir(const fs::path filename, std::string out_dir) {
     std::ifstream file(filename, std::ios::binary);
     file.seekg(1);
-    decompress_dir(file);
+    decompress_dir(file, out_dir);
     file.close();
 }

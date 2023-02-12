@@ -14,7 +14,11 @@ add_library(compression STATIC
     src/serialization.cpp
     src/util.cpp
 )
-target_include_directories(compression PUBLIC lib/)
+target_include_directories(
+    compression
+    PUBLIC lib/public
+    PRIVATE lib/private
+)
 add_executable(compressor src/compressor.cpp)
 target_link_libraries(compressor compression)
 add_executable(decompressor src/decompressor.cpp)

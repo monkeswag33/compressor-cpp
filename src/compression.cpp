@@ -130,12 +130,7 @@ void compress_file(std::ofstream& file, const fs::path filename) {
 }
 
 void compress_file(const fs::path filename, std::string out_file) {
-    fs::path fn;
-    if (out_file == "")
-        fn = filename.stem().replace_extension(".cmp");
-    else
-        fn = out_file;
-    std::ofstream file(fn, std::ios::binary);
+    std::ofstream file(out_file == "" ? filename.stem().replace_extension(".cmp").string() : out_file, std::ios::binary);
     char tmp = 0;
     file.write(&tmp, 1);
     compress_file(file, filename);
@@ -155,8 +150,8 @@ void compress_dir(std::ofstream& file, const fs::path path) {
     file.write(reinterpret_cast<char*>(&num_files), sizeof(num_files));
 }
 
-void compress_dir(const fs::path path) {
-    std::ofstream file(path.stem().append(".cmp"), std::ios::binary);
+void compress_dir(const fs::path path, std::string out_file) {
+    std::ofstream file(out_file == "" ? path.stem().append(".cmp").string() : out_file, std::ios::binary);
     char tmp = 1;
     file.write(&tmp, 1);
     compress_dir(file, path);
