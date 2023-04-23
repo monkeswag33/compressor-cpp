@@ -1,31 +1,33 @@
-# compressor-v2
+# A Compressor in C++
 A compressor/decompressor using Huffman coding  
+
+## How It Works
+The compressor follows the following steps:
+- Read the input file(s)
+- Generate frequencies of each character
+- Generate a [huffman tree](https://en.wikipedia.org/wiki/Huffman_coding) from the frequencies
+- Write huffman tree to output file
+- Read input file(s) again
+- Get corresponding bits from huffman tree
+- Write bits to output file
+
+The decompressor works in a similar way:
+- Read input file (compressed)
+- Read [huffman tree](https://en.wikipedia.org/wiki/Huffman_coding) from input file
+- Read bits from input file
+- Get corresponding character from huffman tree
+- Write character to output file
 
 ## Build
 ```bash
 # Run in source directory
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=1 # Set BUILD_TESTING to 0 to not build tests
-make -j4 # -j<number of threads>
-```
-
-## Test
-```bash
-make test
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0 # Set BUILD_TESTING to 1 to build tests
+make -j4 # Replace 4 with number of threads
 ```
 
 ## How to Use
-The compressor and decompressor have the following arguments:
-```
-Compressor:
-Argument 1: File or directory to compress
-Argument 2: OPTIONAL - Output filename; defaults to "<file or directory name>.cmp"
-
-Decompressor:
-Argument 1: File or directory to decompress
-Argument 2: OPTIONAL - Output filename; defaults to file or directory name
-```
 ### Compressing a Directory
 Say you have a directory structure like this:
 ```bash
