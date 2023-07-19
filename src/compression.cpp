@@ -2,6 +2,7 @@
 #include <set>
 #include <fstream>
 #include <algorithm>
+#include <iostream>
 #include "types.h"
 #include "util.h"
 #include "serialization.h"
@@ -84,20 +85,6 @@ void gen_bitpair(Node& node, Node* parent, bitpair& bp, std::vector<unsigned cha
 void gen_bitpair(Node* node, bitpair& bp, std::vector<unsigned char>& pseudo_bits) {
     std::vector<unsigned char> temp;
     gen_bitpair(*node, nullptr, bp, temp, pseudo_bits);
-}
-
-nodepq frequencies(std::string str) {
-    std::set<char> unique(str.begin(), str.end());
-    std::priority_queue<Node, std::vector<Node>, Compare> pq;
-    for (char c : unique) {
-        unsigned int frequency = std::count(str.begin(), str.end(), c);
-        Node n;
-        n.chr = c;
-        n.frequency = frequency;
-        n.type = LEAF_NODE;
-        pq.push(n);
-    }
-    return pq;
 }
 
 void read_file(std::ifstream& file, long size, nodepq* pq) {
