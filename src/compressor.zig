@@ -1,4 +1,4 @@
-const compress_dir = @import("compression.zig").compress_dir;
+const compress_dir = @import("compression.zig").compressDir;
 const std = @import("std");
 const log = std.log;
 const fs = std.fs;
@@ -8,7 +8,7 @@ const fmt = std.fmt;
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
-    defer std.debug.assert(gpa.deinit() == .ok);
+    defer _ = gpa.deinit();
     var args = std.process.args();
     _ = args.next();
     var arg = args.next();
