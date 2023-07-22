@@ -19,12 +19,9 @@ The decompressor works in a similar way:
 - Write character to output file
 
 ## Build
+Building is extremely easy with Zig.
 ```bash
-# Run in source directory
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0 # Set BUILD_TESTING to 1 to build tests
-make -j4 # Replace 4 with number of threads
+$ zig build -Doptimize=ReleaseSafe
 ```
 
 ## How to Use
@@ -40,11 +37,4 @@ Compress the directory like this:
 ```bash
 ./compressor directory_to_compress/ # Creates a file called directory_to_compress.cmp
 ./decompressor directory_to_compress.cmp # Recreates the directory_to_compress directory
-```
-
-### Compressing a File
-Compress a file like this:
-```bash
-./compressor file_to_compress.txt # Creates a file called file_to_compress.cmp
-./decompressor file_to_compress.cmp # Recreates the file_to_compress.txt
 ```
